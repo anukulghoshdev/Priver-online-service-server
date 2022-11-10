@@ -56,9 +56,50 @@ async function run(){
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const service = await serviceCollection.findOne(query);
-            console.log(service);
+            // console.log(service);
             res.send(service)
         })
+
+        //post a single post
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            // console.log(result);
+            res.send(result);
+        })
+
+        // get all reviews
+        
+
+        // get reviews of specific services
+        app.get('/reviews', async(req,res)=>{
+            let query = {}
+            if (req.query.service_id){
+                query={
+                    service_id: req.query.service_id
+                }
+            }
+            const cursor = reviewCollection.find(query)
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+        })
+
+        app.get('/myreviews', async(req,res)=>{
+            let query = {}
+            if (req.query.email){
+                query={
+                    user_Email: req.query.email
+                }
+            }
+            const cursor = reviewCollection.find(query)
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+        })
+
+
+
+
+
 
         
 
