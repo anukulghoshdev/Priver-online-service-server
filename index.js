@@ -84,6 +84,7 @@ async function run(){
             res.send(reviews);
         })
 
+        //get reviews for specifit user/user email
         app.get('/myreviews', async(req,res)=>{
             let query = {}
             if (req.query.email){
@@ -95,6 +96,17 @@ async function run(){
             const reviews = await cursor.toArray();
             res.send(reviews);
         })
+
+        // delete a review
+        app.delete('/myreviews/:id', async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const result = await reviewCollection.deleteOne(query);
+            console.log(result);
+            res.send(result);
+        })
+
+        
 
 
 
