@@ -25,6 +25,28 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+
+function verfiyJWT(req, res, next){
+    const authHeader = req.headers.authorization; 
+    
+
+    if(!authHeader){
+        return res.status(401).send({message: 'unauthorized access'});  
+    }
+    const token = authHeader.split(' ')[1];      // ['Bearer', 'eyJhbGciOiJI...']
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
+        if(err){
+            return res.status(403).send({message: 'Forbidden'});
+        }
+
+        req.decoded = decoded;  // { email: 'anukulghosh4@gmail.com', iat: 1667742143, exp: 1667745743 }
+        next()
+    })
+    
+}
+
+
+
 async function run(){
     try{
         const serviceCollection = client.db('ass10').collection('services');
@@ -102,21 +124,44 @@ async function run(){
             const id = req.params.id;
             const query = {_id:ObjectId(id)};
             const result = await reviewCollection.deleteOne(query);
-            console.log(result);
+            // console.log(result);
             res.send(result);
         })
 
+
+
+
+        // get single review then update
+        app.get('/myreviews/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const result = await reviewCollection.findOne(query);
+            // console.log(result);
+            res.send(result);
+        })
+
+        app.put('/myreviews/:id', async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            console.log(query , id);
+            const review = req.body;
+            console.log(review.reviewPost);
+            // const option = {upsert:true} ;
+            const updateReview = {
+                $set: {
+                    reviewPost: review.reviewPost
+                }
+            }
+            console.log(updateReview);
+            const result = await reviewCollection.updateOne(query, updateReview)
+            console.log(result);
+            res.send(result);
+
+        })
+
         
-
-
-
-
-
-
-        
-
-
     }
+
     finally{
 
     }
