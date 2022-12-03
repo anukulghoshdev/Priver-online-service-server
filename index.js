@@ -42,7 +42,8 @@ function verfiyJWT(req, res, next) {
 
 }
 
-
+const date = new Date();
+const getTime = date.getTime()
 
 async function run() {
     try {
@@ -72,8 +73,27 @@ async function run() {
             res.send(services);
         });
         app.get('/allservices', async (req, res) => {
-            const query = {}
-            const cursor = serviceCollection.find(query);
+            // const query = {price: {$gte : 1000}}
+            // const query = { price: { $gt: 100, $lt: 300 } }
+            // const query = { price: { $eq: 200 } }
+            // const query = { price: { $lte: 200 } }
+            // const query = { price: { $ne: 150 } }
+            // const query = { price: { $in: [20, 40, 150] } }
+            // const query = { price: { $nin: [20, 40, 150] } }
+            // const query = { $and: [{price: {$gt: 20}}, {price: {$gt: 100}}] }
+            const search = req.query.search;
+            console.log(search);
+            let query = {}
+            if (search.length) {
+                query = {
+                    $text: {
+                        $search: search
+                    }
+                }
+            }
+
+            const order = req.query.order === 'asc' ? 1 : -1;
+            const cursor = serviceCollection.find(query).sort({ price: order });
             const services = await cursor.toArray();
             // console.log(services);
             res.send(services);
